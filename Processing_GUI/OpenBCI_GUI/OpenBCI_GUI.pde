@@ -12,7 +12,7 @@
 ///////////////////////////////////////////////
 
 
-import processing.serial.*;
+//import processing.serial.*;
 import ddf.minim.analysis.*; //for FFT
 import java.util.*; //for Array.copyOfRange()
 import java.lang.Math; //for exp, log, sqrt...they seem better than Processing's built-in
@@ -212,7 +212,8 @@ void initializeFFTObjects(FFT[] fftBuff, float[][] dataBuffY_uV, int N, float fs
 int win_x = 1200;  int win_y = 768;  //desktop PC
 void setup() {
 
-  size(win_x, win_y, P2D);
+  //size(win_x, win_y, P2D); 
+  size(1200,768);
   //if (frame != null) frame.setResizable(true);  //make window resizable
   //attach exit handler
   //prepareExitHandler();
