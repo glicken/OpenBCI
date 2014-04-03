@@ -56,7 +56,8 @@ class OpenBCI_ADS1299 {
   int prefered_datamode = DATAMODE_BIN;
 
   
-  Serial serial_openBCI = null;
+  //Serial 
+  Foo_Serial serial_openBCI = null;
   int state = STATE_NOCOM;
   int dataMode = prefered_datamode;
   int prevState_millis = 0;
@@ -83,7 +84,7 @@ class OpenBCI_ADS1299 {
   
   //manage the serial port  
   int openSerialPort(PApplet applet, String comPort, int baud) {
-    serial_openBCI = new Serial(applet,comPort,baud); //open the com port
+    serial_openBCI = new Foo_Serial(applet,comPort,baud); //open the com port
     serial_openBCI.clear(); // clear anything in the com port's buffer     
     changeState(STATE_COMINIT);
     return 0;

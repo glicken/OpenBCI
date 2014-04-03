@@ -13,7 +13,7 @@
 
 
 //import processing.serial.*;
-import ddf.minim.analysis.*; //for FFT
+//import ddf.minim.analysis.*; //for FFT
 import java.util.*; //for Array.copyOfRange()
 import java.lang.Math; //for exp, log, sqrt...they seem better than Processing's built-in
 import processing.core.PApplet;
@@ -22,7 +22,7 @@ import processing.core.PApplet;
 final int DATASOURCE_NORMAL =  0;
 final int DATASOURCE_SYNTHETIC = 1;
 final int DATASOURCE_PLAYBACKFILE = 2;
-final int eegDataSource = DATASOURCE_PLAYBACKFILE;
+final int eegDataSource = DATASOURCE_SYNTHETIC;
 
 //Serial communications constants
 OpenBCI_ADS1299 openBCI;
@@ -74,6 +74,8 @@ FilterConstants[] filtCoeff_bp = new FilterConstants[N_FILT_CONFIGS];
 FilterConstants[] filtCoeff_notch = new FilterConstants[N_FILT_CONFIGS];
 int currentFilt_ind = 0;
 
+
+
 //fft constants
 int Nfft = 256; //set resolution of the FFT.  Use N=256 for normal, N=512 for MU waves
 //float fft_smooth_fac = 0.75f; //use value between [0 and 1].  Bigger is more smoothing.  Use 0.9 for MU waves, 0.75 for Alpha, 0.0 for no smoothing
@@ -97,7 +99,7 @@ int inByte = -1;    // Incoming serial data
 
 //file writing variables
 //PrintWriter fileoutput;
-OutputFile_rawtxt fileoutput;
+//OutputFile_rawtxt fileoutput;
 String output_fname;
 
 //openBCI data packet
@@ -213,7 +215,7 @@ int win_x = 1200;  int win_y = 768;  //desktop PC
 void setup() {
 
   //size(win_x, win_y, P2D); 
-  size(1200,768);
+  size(1200,768,P2D);
   //if (frame != null) frame.setResizable(true);  //make window resizable
   //attach exit handler
   //prepareExitHandler();
@@ -263,7 +265,7 @@ void setup() {
   switch (eegDataSource) {
     case DATASOURCE_NORMAL:
       //list all the serial ports available...useful for debugging
-      println(Serial.list());
+      //println(Serial.list());
       //openBCI_portName = Serial.list()[0];
       
       // Open the serial port to the Arduino that has the OpenBCI
@@ -325,13 +327,13 @@ void draw() {
     //update the title of the figure;
     switch (eegDataSource) {
       case DATASOURCE_NORMAL:
-        frame.setTitle(int(frameRate) + " fps, Byte Count = " + openBCI_byteCount + ", bit rate = " + byteRate_perSec*8 + " bps" + ", " + int(float(fileoutput.getRowsWritten())/fs_Hz) + " secs Saved, Writing to " + output_fname);
+        //frame.setTitle(int(frameRate) + " fps, Byte Count = " + openBCI_byteCount + ", bit rate = " + byteRate_perSec*8 + " bps" + ", " + int(float(fileoutput.getRowsWritten())/fs_Hz) + " secs Saved, Writing to " + output_fname);
         break;
       case DATASOURCE_SYNTHETIC:
-        frame.setTitle(int(frameRate) + " fps, Using Synthetic EEG Data");
+        //frame.setTitle(int(frameRate) + " fps, Using Synthetic EEG Data");
         break;
       case DATASOURCE_PLAYBACKFILE:
-        frame.setTitle(int(frameRate) + " fps, Playing " + int(float(currentTableRowIndex)/fs_Hz) + " of " + int(float(playbackData_table.getRowCount())/fs_Hz) + " secs, Reading from: " + playbackData_fname);
+        //frame.setTitle(int(frameRate) + " fps, Playing " + int(float(currentTableRowIndex)/fs_Hz) + " of " + int(float(playbackData_table.getRowCount())/fs_Hz) + " secs, Reading from: " + playbackData_fname);
         break;  
     }       
   }
@@ -465,6 +467,7 @@ void processNewData() {
   
 }
 
+/*
 void serialEvent(Serial port) {
   //check to see which serial port it is
   if (port == openBCI.serial_openBCI) {
@@ -485,6 +488,7 @@ void serialEvent(Serial port) {
     print(char(inByte));
   }
 }
+*/
 
 //interpret a keypress...the key pressed comes in as "key"
 void keyPressed() {
@@ -667,7 +671,7 @@ void parseKey(char val) {
      break;
     default:
      println("OpenBCI_GUI: '" + key + "' Pressed...sending to OpenBCI...");
-     if (openBCI != null) openBCI.serial_openBCI.write(key + "\n"); //send the value as ascii with a newline character
+     //if (openBCI != null) openBCI.serial_openBCI.write(key + "\n"); //send the value as ascii with a newline character
      break;
   }
 }
@@ -903,8 +907,8 @@ void synthesizeData(int nchan, float fs_Hz, float scale_fac_uVolts_per_count, Da
   float val_uV;
   for (int Ichan=0; Ichan < nchan; Ichan++) {
     if (isChannelActive(Ichan)) { 
-      val_uV = randomGaussian()*sqrt(fs_Hz/2.0f); // ensures that it has amplitude of one unit per sqrt(Hz) of signal bandwidth
-      //val_uV = random(1)*sqrt(fs_Hz/2.0f); // ensures that it has amplitude of one unit per sqrt(Hz) of signal bandwidth
+      //val_uV = randomGaussian()*sqrt(fs_Hz/2.0f); // ensures that it has amplitude of one unit per sqrt(Hz) of signal bandwidth
+      val_uV = 0.0f;
       if (Ichan==0) val_uV*= 10f;  //scale one channel higher
     } 
     else {
@@ -1034,19 +1038,19 @@ void setBiasState(boolean state) {
 
 void openNewLogFile() {
   //close the file if it's open
-  if (fileoutput != null) {
-    println("OpenBCI_GUI: closing log file");
-    closeLogFile();
-  }
+//  if (fileoutput != null) {
+//    println("OpenBCI_GUI: closing log file");
+//    closeLogFile();
+//  }
   
   //open the new file
-  fileoutput = new OutputFile_rawtxt(fs_Hz);
-  output_fname = fileoutput.fname;
-  println("openBCI: openNewLogFile: opened output file: " + output_fname);
+  //fileoutput = new OutputFile_rawtxt(fs_Hz);
+  //output_fname = fileoutput.fname;
+  //println("openBCI: openNewLogFile: opened output file: " + output_fname);
 }
 
 void closeLogFile() {
-  fileoutput.closeFile();
+  //fileoutput.closeFile();
 }
 
 void incrementFilterConfiguration() {

@@ -141,3 +141,14 @@ public class TextBox {
   }
 };
 
+
+class Foo_Serial {
+  Foo_Serial() {};
+  Foo_Serial(PApplet parent, String comPort, int baud) {};
+
+  public void clear() {};
+  public void stop() {};
+  public void write(String foo) {};
+  public int read() { return 0; };
+ 
+}
