@@ -28,11 +28,11 @@ final int DATASOURCE_NORMAL =  0;        //Receive LIVE data from OpenBCI
 final int DATASOURCE_NORMAL_W_AUX =  1;  //Receive LIVE data from OpenBCI plus the Aux data recorded by the Arduino  
 final int DATASOURCE_SYNTHETIC = 2;    //Generate synthetic signals (steady noise)
 final int DATASOURCE_PLAYBACKFILE = 3; //Playback previously recorded data...see "playbackData_fname" down below
-final int eegDataSource = DATASOURCE_PLAYBACKFILE;
+final int eegDataSource = DATASOURCE_NORMAL;
 
 //Serial communications constants
 OpenBCI_ADS1299 openBCI;
-String openBCI_portName = "COM12";   /************** CHANGE THIS TO MATCH THE COM PORT REPORTED ON *YOUR* COMPUTER *****************/
+String openBCI_portName = "COM33";   /************** CHANGE THIS TO MATCH THE COM PORT REPORTED ON *YOUR* COMPUTER *****************/
 
 //these settings are for a single OpenBCI board
 int openBCI_baud = 115200; //baud rate from the rArduino
@@ -538,6 +538,7 @@ void processNewData() {
     ///add raw data to spectrogram...if the correct channel...
     //...look for the first channel that is active (meaning button is not active) or, if it
     //     hasn't yet sent any data, send the last channel even if the channel is off
+    boolean sendToSpectrogram=false;
     if (sendToSpectrogram & (isChannelActive(Ichan) | (Ichan == (nchan-1)))) { //send data to spectrogram
       sendToSpectrogram = false;  //prevent us from sending more data after this time through
       gui.tellGUIWhichChannelForSpectrogram(Ichan);

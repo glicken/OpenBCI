@@ -22,15 +22,16 @@ import processing.core.PApplet;
 
 
 //choose where to get the EEG data
-final int DATASOURCE_NORMAL =  0;        //Receive LIVE data from OpenBCI
-final int DATASOURCE_NORMAL_W_AUX =  1;  //Receive LIVE data from OpenBCI plus the Aux data recorded by the Arduino  
-final int DATASOURCE_SYNTHETIC = 2;    //Generate synthetic signals (steady noise)
-final int DATASOURCE_PLAYBACKFILE = 3; //Playback previously recorded data...see "playbackData_fname" down below
-final int eegDataSource = DATASOURCE_PLAYBACKFILE;
+final int DATASOURCE_NORMAL =  0;       //Receive LIVE data from OpenBCI (V3 board)
+final int DATASOURCE_NORMAL_W_AUX =  1; //Receive LIVE data from OpenBCI plus the Aux data recorded by the Arduino  
+final int DATASOURCE_SYNTHETIC = 2;     //Generate synthetic signals (steady noise)
+final int DATASOURCE_PLAYBACKFILE = 3;  //Playback previously recorded data...see "playbackData_fname" down below
+final int DATASOURCE_NORMAL_V1V2 = 4;   //Receive LIVE data from OpenBCI V1 or V2 boards
+final int eegDataSource = DATASOURCE_NORMAL;
 
 //Serial communications constants
 OpenBCI_ADS1299 openBCI = new OpenBCI_ADS1299(); //dummy creation to get access to constants, create real one later
-String openBCI_portName = "COM4";   /************** CHANGE THIS TO MATCH THE COM PORT REPORTED ON *YOUR* COMPUTER *****************/
+String openBCI_portName = "COM33";   /************** CHANGE THIS TO MATCH THE COM PORT REPORTED ON *YOUR* COMPUTER *****************/
 
 //these settings are for a single OpenBCI board
 int openBCI_baud = 115200; //baud rate from the rArduino
@@ -216,7 +217,7 @@ void setup() {
 
   //prepare the source of the input data
   switch (eegDataSource) {
-    case DATASOURCE_NORMAL: case DATASOURCE_NORMAL_W_AUX:
+    case DATASOURCE_NORMAL: case DATASOURCE_NORMAL_W_AUX: case DATASOURCE_NORMAL_V1V2:
       //list all the serial ports available...useful for debugging
       println(Serial.list());
       //openBCI_portName = Serial.list()[0];
@@ -225,7 +226,9 @@ void setup() {
       println("OpenBCI_GUI: Opening Serial " + openBCI_portName);
       int nDataValuesPerPacket = OpenBCI_Nchannels;
       if (eegDataSource == DATASOURCE_NORMAL_W_AUX) nDataValuesPerPacket += n_aux_ifEnabled;
-      openBCI = new OpenBCI_ADS1299(this, openBCI_portName, openBCI_baud, nDataValuesPerPacket); //this also starts the data transfer after XX seconds
+      boolean isOpenBCI_V1V2 = false;
+      if (eegDataSource == DATASOURCE_NORMAL_V1V2) isOpenBCI_V1V2 = true;
+      openBCI = new OpenBCI_ADS1299(this, openBCI_portName, openBCI_baud, nDataValuesPerPacket,isOpenBCI_V1V2); //this also starts the data transfer after XX seconds
       break;
     case DATASOURCE_SYNTHETIC:
       //do nothing

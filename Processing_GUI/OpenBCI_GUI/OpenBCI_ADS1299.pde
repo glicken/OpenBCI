@@ -54,6 +54,7 @@ class OpenBCI_ADS1299 {
   
   final static byte BYTE_START = (byte)0xA0;
   final static byte BYTE_END = (byte)0xC0;
+  boolean is_OpenBCI_V1V2 = false;
   
   int prefered_datamode = DATAMODE_BIN;
 
@@ -81,6 +82,10 @@ class OpenBCI_ADS1299 {
   //constructors
   OpenBCI_ADS1299() {};  //only use this if you simply want access to some of the constants
   OpenBCI_ADS1299(PApplet applet, String comPort, int baud, int nValuesPerPacket) {
+    this(applet,comPort,baud,nValuesPerPacket,false);
+  };
+  OpenBCI_ADS1299(PApplet applet, String comPort, int baud, int nValuesPerPacket, boolean _is_OpenBCI_V1V2) {
+    is_OpenBCI_V1V2 = _is_OpenBCI_V1V2;
     
     //choose data mode
     //println("OpenBCI_ADS1299: prefered_datamode = " + prefered_datamode + ", nValuesPerPacket%8 = " + (nValuesPerPacket % 8));
@@ -199,8 +204,8 @@ class OpenBCI_ADS1299 {
   so this protocol parser expects the lower bytes first.
 
   Start Indicator: 0xA0
-  Packet_length  : 1 byte  (length = 4 bytes framenumber + 4 bytes per active channel + (optional) 4 bytes for 1 Aux value)
-  Framenumber    : 4 bytes (Sequential counter pf packets)
+  Packet_length  : 1 byte  (length = 1 (or 4) byte framenumber + 4 bytes per active channel + (optional) 4 bytes for 1 Aux value)
+  Framenumber    : 1 byte (Sequential counter pf packets) or 4 bytes if OpenBCI V1 or V2
   Channel 1 data  : 4 bytes 
   ...
   Channel N data  : 4 bytes
@@ -225,7 +230,11 @@ class OpenBCI_ADS1299 {
          break;
       case 1:
          //look for byte that gives length of the payload  
-         nDataValuesInPacket = ((int)actbyte) / 4 - 1;   // get number of channels
+         if (is_OpenBCI_V1V2 == true) {
+           nDataValuesInPacket = ((int)(actbyte-4)) / 4;   // get number of channels, less the 4-byte counter
+         } else {
+           nDataValuesInPacket = ((int)(actbyte-1)) / 4;   // get number of channels, less the 1-byte counter
+         }
          //println("OpenBCI_ADS1299: interpretBinaryStream: nDataValuesInPacket = " + nDataValuesInPacket);
          //if (nDataValuesInPacket != num_channels) { //old check, too restrictive
          if ((nDataValuesInPacket < 0) || (nDataValuesInPacket > dataPacket.values.length)) {
@@ -241,9 +250,16 @@ class OpenBCI_ADS1299 {
         //check the packet counter
         localByteBuffer[localByteCounter] = actbyte;
         localByteCounter++;
-        if (localByteCounter==4) {
-          dataPacket.sampleIndex = interpretAsInt32(localByteBuffer); //added WEA
-          if ((dataPacket.sampleIndex-prevSampleIndex) != 1) {
+        if ((!is_OpenBCI_V1V2) || (localByteCounter==4)) { //OpenBCI V1 and V2 had a 4 byte packet counter
+          if (is_OpenBCI_V1V2) {
+            dataPacket.sampleIndex = interpretAsInt32(localByteBuffer); //added WEA
+          } else {
+            //default for OpenBCI V3
+            dataPacket.sampleIndex = int(actbyte);
+          }
+          
+          int diff_sampleIndex = dataPacket.sampleIndex-prevSampleIndex;
+          if ((diff_sampleIndex != 1) && (diff_sampleIndex != (-255))) {
             serialErrorCounter++;
             println("OpenBCI_ADS1299: interpretBinaryStream: apparent sampleIndex jump from Serial data: " + prevSampleIndex + " to  " + dataPacket.sampleIndex + ".  Keeping packet. (" + serialErrorCounter + ")");
           }
@@ -273,6 +289,7 @@ class OpenBCI_ADS1299 {
         break;
       case 4:
         //look for end byte
+        //println("Looking for end byte.  Looking for: " + int(0xC0) + ", Received: " + int(actbyte));
         if (actbyte == byte(0xC0)) {    // if correct end delimiter found:
           //println("OpenBCI_ADS1299: interpretBinaryStream: found end byte. Setting isNewDataPacketAvailable to TRUE");
           isNewDataPacketAvailable = true; //original place for this.  but why not put it in the previous case block
