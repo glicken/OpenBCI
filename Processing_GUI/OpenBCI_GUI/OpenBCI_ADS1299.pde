@@ -375,17 +375,26 @@ class OpenBCI_ADS1299 {
     }
   }
   
-  int interpretAsInt32(byte[] byteArray) {     
-    //little endian
-    return int(
-      ((0xFF & byteArray[3]) << 24) | 
-      ((0xFF & byteArray[2]) << 16) |
-      ((0xFF & byteArray[1]) << 8) | 
-      (0xFF & byteArray[0])
+  int interpretAsInt32(byte[] byteArray) {
+    if (is_OpenBCI_V1V2) {    
+      //little endian
+      return int(
+        ((0xFF & byteArray[3]) << 24) | 
+        ((0xFF & byteArray[2]) << 16) |
+        ((0xFF & byteArray[1]) << 8) | 
+        (0xFF & byteArray[0])
       );
+    } else {
+      //big endian
+      return int(
+        ((0xFF & byteArray[0]) << 24) | 
+        ((0xFF & byteArray[1]) << 16) |
+        ((0xFF & byteArray[2]) << 8) | 
+        (0xFF & byteArray[3])
+      );     
+    }
   }
   
-
   
   int copyDataPacketTo(DataPacket_ADS1299 target) {
     isNewDataPacketAvailable = false;
