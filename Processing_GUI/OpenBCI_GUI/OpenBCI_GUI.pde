@@ -27,11 +27,11 @@ final int DATASOURCE_NORMAL_W_AUX =  1; //Receive LIVE data from OpenBCI plus th
 final int DATASOURCE_SYNTHETIC = 2;     //Generate synthetic signals (steady noise)
 final int DATASOURCE_PLAYBACKFILE = 3;  //Playback previously recorded data...see "playbackData_fname" down below
 final int DATASOURCE_NORMAL_V1V2 = 4;   //Receive LIVE data from OpenBCI V1 or V2 boards
-final int eegDataSource = DATASOURCE_NORMAL;
+final int eegDataSource = DATASOURCE_NORMAL; //which of the above options do you want?
 
 //Serial communications constants
 OpenBCI_ADS1299 openBCI = new OpenBCI_ADS1299(); //dummy creation to get access to constants, create real one later
-String openBCI_portName = "COM33";   /************** CHANGE THIS TO MATCH THE COM PORT REPORTED ON *YOUR* COMPUTER *****************/
+String openBCI_portName = "COM5";   /************** CHANGE THIS TO MATCH THE COM PORT REPORTED ON *YOUR* COMPUTER *****************/
 
 //these settings are for a single OpenBCI board
 int openBCI_baud = 115200; //baud rate from the rArduino
@@ -496,6 +496,7 @@ void processNewData() {
 //pre-allocated dataPacketBuff
 void serialEvent(Serial port) {
   //check to see which serial port it is
+  //println("serialEvent: byte received");
   if (port == openBCI.serial_openBCI) {
     boolean echoBytes = !openBCI.isStateNormal(); 
     openBCI.read(echoBytes);

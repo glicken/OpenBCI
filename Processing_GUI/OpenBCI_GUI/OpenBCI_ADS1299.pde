@@ -46,7 +46,7 @@ class OpenBCI_ADS1299 {
   final static int STATE_NOCOM = 0;
   final static int STATE_COMINIT = 1;
   final static int STATE_NORMAL = 2;
-  final static int COM_INIT_MSEC = 4000; //you may need to vary this for your computer or your Arduino
+  final static int COM_INIT_MSEC = 10000; //you may need to vary this for your computer or your Arduino
   
   int[] measured_packet_length = {0,0,0,0,0};
   int measured_packet_length_ind = 0;
@@ -158,7 +158,7 @@ class OpenBCI_ADS1299 {
     println("OpenBCI_ADS1299: startDataTransfer: received command for mode = " + mode);
     switch (mode) {
       case DATAMODE_BIN:
-        serial_openBCI.write(command_startBinary + "\n");
+        serial_openBCI.write(command_startBinary);
         println("OpenBCI_ADS1299: startDataTransfer: starting binary transfer");
         break;
       case DATAMODE_BIN_WAUX:
